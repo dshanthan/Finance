@@ -12,7 +12,6 @@ tickers = ["AAPL", "TSLA", "BRK-B", "^GSPC"]
 start_date = "2025-01-01"
 today = datetime.now().strftime("%Y-%m-%d")
 
-    try:
         stock = yf.Ticker(ticker)
         
         # Fetch YTD data for all-time high this year
