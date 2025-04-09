@@ -13,7 +13,7 @@ start_date = "2025-01-01"
 today = datetime.now().strftime("%Y-%m-%d")  # Current date
 
 for ticker in tickers:
-    st.write(f"Fetching data for {ticker}...")
+  
     try:
         # Fetch YTD data
         stock = yf.Ticker(ticker)
