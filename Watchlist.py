@@ -60,4 +60,4 @@ for ticker in tickers:
 
 # Create DataFrame and display as table
 df = pd.DataFrame(data)
-st.table(df)
+st.dataframe(df)
