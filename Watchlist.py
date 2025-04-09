@@ -42,22 +42,61 @@ for ticker in tickers:
             
             # Add to data dictionary
             data["Ticker"].append(ticker)
-            data["Most Recent Price"].append(f"${recent_price:.2f}")
-            data["2025 All-Time High"].append(f"${ath_this_year:.2f}")
-            data["Down from ATH (%)"].append(f"{pct_down:.2f}")
+            data["Most Recent Price"].append(recent_price)  # Raw numbers for styling
+            data["2025 All-Time High"].append(ath_this_year)
+            data["Down from ATH (%)"].append(pct_down)
         else:
-            # Handle no data case
             data["Ticker"].append(ticker)
-            data["Most Recent Price"].append("N/A")
-            data["2025 All-Time High"].append("N/A")
-            data["Down from ATH (%)"].append("N/A")
+            data["Most Recent Price"].append(None)
+            data["2025 All-Time High"].append(None)
+            data["Down from ATH (%)"].append(None)
     except Exception as e:
-        # Handle errors
         data["Ticker"].append(ticker)
-        data["Most Recent Price"].append("Error")
-        data["2025 All-Time High"].append("Error")
-        data["Down from ATH (%)"].append(f"{str(e)}")
+        data["Most Recent Price"].append(None)
+        data["2025 All-Time High"].append(None)
+        data["Down from ATH (%)"].append(None)
 
-# Create DataFrame and display as table
+# Create DataFrame
 df = pd.DataFrame(data)
-st.dataframe(df)
+
+# Define styling function
+def style_table(df):
+    # Convert numbers to formatted strings for display, handle None values
+    styled_df = df.style.format({
+        "Most Recent Price": lambda x: f"${x:.2f}" if pd.notnull(x) else "N/A",
+        "2025 All-Time High": lambda x: f"${x:.2f}" if pd.notnull(x) else "N/A",
+        "Down from ATH (%)": lambda x: f"{x:.2f}%" if pd.notnull(x) else "N/A"
+    })
+    
+    # Apply styles
+    styled_df = styled_df.set_properties(**{
+        'text-align': 'center',           # Center all text
+        'border': '1px solid #ddd',       # Light gray borders
+        'background-color': '#f9f9f9',    # Subtle gray background
+        'padding': '5px'                  # Spacing inside cells
+    })
+    
+    # Style specific columns
+    styled_df = styled_df.set_properties(
+        subset=["Most Recent Price", "2025 All-Time High"],
+        **{'color': '#2ecc71'}  # Green for prices
+    )
+    styled_df = styled_df.set_properties(
+        subset=["Down from ATH (%)"],
+        **{'color': '#e74c3c'}  # Red for percentage drop
+    )
+    
+    # Bold headers
+    styled_df = styled_df.set_table_styles([
+        {'selector': 'th',
+         'props': [('font-weight', 'bold'),
+                   ('text-align', 'center'),
+                   ('background-color', '#34495e'),  # Dark blue header
+                   ('color', 'white'),
+                   ('border', '1px solid #ddd')]}
+    ])
+    
+    return styled_df
+
+# Display styled table
+st.dataframe(style_table(df), use_container_width=True)
