@@ -5,8 +5,8 @@ from datetime import datetime
 
 st.title("My Stock Watchlist")
 
-# Your ticker list
-tickers = ["AAPL", "TSLA", "BRK-B"]
+# Updated ticker list with S&P 500 (^GSPC)
+tickers = ["AAPL", "TSLA", "BRK-B", "^GSPC"]
 
 # Set the start of 2025 for YTD data
 start_date = "2025-01-01"
