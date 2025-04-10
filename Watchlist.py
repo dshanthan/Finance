@@ -4,11 +4,8 @@ import pandas as pd
 from datetime import datetime
 from MarketOverview import display_market_overview
 
-# Display market overview at the absolute top
+# Display market overview at the top
 display_market_overview()
-
-# Main title
-st.title("My Stock Watchlist")
 
 # Watchlist tickers
 tickers = ["AAPL", "TSLA", "BRK-B", "^GSPC"]
@@ -84,6 +81,6 @@ def style_table(df):
     ])
     return styled_df
 
-# Display watchlist title with larger font and table
+# Display watchlist title and table
 st.markdown("<h2 style='font-size: 36px;'>My Stock Watchlist</h2>", unsafe_allow_html=True)
 st.dataframe(style_table(df), use_container_width=True)
