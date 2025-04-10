@@ -2,8 +2,6 @@ import streamlit as st
 import yfinance as yf
 
 def display_market_overview():
-    st.subheader("Market Overview (April 9, 2025)")
-
     # Define tickers for major indexes, oil, and gold
     market_tickers = {
         "S&P 500 (SPY)": "SPY",
@@ -53,18 +51,16 @@ def display_market_overview():
         sentiment = "N/A"
         sentiment_color = "black"
 
-    # Display in columns
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"**S&P 500 (SPY):** ${market_data['S&P 500 (SPY)']:.2f}" if market_data['S&P 500 (SPY)'] != "N/A" else "**S&P 500 (SPY):** N/A")
-        st.markdown(f"**Dow Jones (DIA):** ${market_data['Dow Jones (DIA)']:.2f}" if market_data['Dow Jones (DIA)'] != "N/A" else "**Dow Jones (DIA):** N/A")
-    with col2:
-        st.markdown(f"**Nasdaq (QQQ):** ${market_data['Nasdaq (QQQ)']:.2f}" if market_data['Nasdaq (QQQ)'] != "N/A" else "**Nasdaq (QQQ):** N/A")
-        st.markdown(f"**Oil (USO):** ${market_data['Oil (USO)']:.2f}" if market_data['Oil (USO)'] != "N/A" else "**Oil (USO):** N/A")
-    with col3:
-        st.markdown(f"**Gold (GLD):** ${market_data['Gold (GLD)']:.2f}" if market_data['Gold (GLD)'] != "N/A" else "**Gold (GLD):** N/A")
-        st.markdown(f"**Sentiment:** <span style='color:{sentiment_color}'>{sentiment}</span>", unsafe_allow_html=True)
-
+    # Display horizontally with styled markdown
+    market_line = (
+        f"<b>S&P 500 (SPY):</b> ${market_data['S&P 500 (SPY)']:.2f}  |  "
+        f"<b>Dow Jones (DIA):</b> ${market_data['Dow Jones (DIA)']:.2f}  |  "
+        f"<b>Nasdaq (QQQ):</b> ${market_data['Nasdaq (QQQ)']:.2f}  |  "
+        f"<b>Oil (USO):</b> ${market_data['Oil (USO)']:.2f}  |  "
+        f"<b>Gold (GLD):</b> ${market_data['Gold (GLD)']:.2f}  |  "
+        f"<b>Sentiment:</b> <span style='color:{sentiment_color}'>{sentiment}</span>"
+    )
+    st.markdown(f"Market Overview (April 9, 2025): {market_line}", unsafe_allow_html=True)
     st.markdown("---")
 
 if __name__ == "__main__":
