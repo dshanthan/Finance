@@ -1,5 +1,6 @@
 import streamlit as st
 import yfinance as yf
+import fear_and_greed  # New import
 
 def display_market_overview():
     # Define tickers for major indexes, oil, and gold
@@ -24,43 +25,36 @@ def display_market_overview():
         except Exception:
             market_data[name] = "N/A"
 
-    # Simulate market sentiment based on SPY change
+    # Fetch CNN Fear & Greed Index using fear-and-greed package
     try:
-        spy = yf.Ticker("SPY")
-        spy_history = spy.history(period="2d")
-        if len(spy_history) >= 2:
-            current_price = spy_history["Close"].iloc[-1]
-            prev_close = spy_history["Close"].iloc[-2]
-            spy_change = ((current_price - prev_close) / prev_close) * 100
-            if spy_change > 2:
-                sentiment = "Extreme Greed"
-                sentiment_color = "#2ecc71"
-            elif spy_change > 0:
-                sentiment = "Greed"
-                sentiment_color = "#27ae60"
-            elif spy_change < -2:
-                sentiment = "Extreme Fear"
-                sentiment_color = "#e74c3c"
-            else:
-                sentiment = "Fear"
-                sentiment_color = "#c0392b"
+        fng_data = fear_and_greed.get()
+        fng_value = fng_data.value  # Numeric value (0-100)
+        sentiment = fng_data.description.capitalize()  # E.g., "Fear", "Greed"
+        if fng_value >= 75:
+            sentiment_color = "#2ecc71"  # Extreme Greed
+        elif fng_value >= 50:
+            sentiment_color = "#27ae60"  # Greed
+        elif fng_value <= 25:
+            sentiment_color = "#e74c3c"  # Extreme Fear
+        elif fng_value < 50:
+            sentiment_color = "#c0392b"  # Fear
         else:
-            sentiment = "N/A"
-            sentiment_color = "black"
+            sentiment_color = "#7f8c8d"  # Neutral
     except Exception:
+        fng_value = "N/A"
         sentiment = "N/A"
         sentiment_color = "black"
 
-    # Display horizontally with styled markdown
+    # Clean horizontal display
     market_line = (
-        f"<b>S&P 500 (SPY):</b> ${market_data['S&P 500 (SPY)']:.2f}  |  "
-        f"<b>Dow Jones (DIA):</b> ${market_data['Dow Jones (DIA)']:.2f}  |  "
-        f"<b>Nasdaq (QQQ):</b> ${market_data['Nasdaq (QQQ)']:.2f}  |  "
-        f"<b>Oil (USO):</b> ${market_data['Oil (USO)']:.2f}  |  "
-        f"<b>Gold (GLD):</b> ${market_data['Gold (GLD)']:.2f}  |  "
-        f"<b>Sentiment:</b> <span style='color:{sentiment_color}'>{sentiment}</span>"
+        f"S&P 500 (SPY): ${market_data['S&P 500 (SPY)']:.2f} | "
+        f"Dow Jones (DIA): ${market_data['Dow Jones (DIA)']:.2f} | "
+        f"Nasdaq (QQQ): ${market_data['Nasdaq (QQQ)']:.2f} | "
+        f"Oil (USO): ${market_data['Oil (USO)']:.2f} | "
+        f"Gold (GLD): ${market_data['Gold (GLD)']:.2f} | "
+        f"CNN Fear & Greed: <span style='color:{sentiment_color}'>{fng_value} ({sentiment})</span>"
     )
-    st.markdown(f"Market Overview (April 9, 2025): {market_line}", unsafe_allow_html=True)
+    st.markdown(market_line, unsafe_allow_html=True)
     st.markdown("---")
 
 if __name__ == "__main__":
