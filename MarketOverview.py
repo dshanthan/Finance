@@ -17,7 +17,7 @@ def display_market_overview():
         try:
             stock = yf.Ticker(ticker)
             intraday = stock.history(period="1d", interval="1m")
-            history = stock.history(period="2d")  # For prev close
+            history = stock.history(period="2d")
             if not intraday.empty and len(history) >= 2:
                 current_price = intraday["Close"].iloc[-1]
                 prev_close = history["Close"].iloc[-2]
@@ -31,29 +31,26 @@ def display_market_overview():
     # Fetch CNN Fear & Greed Index
     try:
         fng_data = fear_and_greed.get()
-        fng_value = fng_data.value  # Numeric value (0-100) for gauge
-        sentiment = fng_data.description.capitalize()  # E.g., "Fear"
+        fng_value = fng_data.value  # Numeric value (0-100)
+        sentiment = fng_data.description.capitalize()
         if fng_value >= 75:
             sentiment_color = "#2ecc71"  # Extreme Greed
-            gauge_position = 0.875  # 87.5% (center of Extreme Greed)
         elif fng_value >= 50:
             sentiment_color = "#27ae60"  # Greed
-            gauge_position = 0.625  # 62.5% (center of Greed)
         elif fng_value <= 25:
             sentiment_color = "#e74c3c"  # Extreme Fear
-            gauge_position = 0.125  # 12.5% (center of Extreme Fear)
         elif fng_value < 50:
             sentiment_color = "#c0392b"  # Fear
-            gauge_position = 0.375  # 37.5% (center of Fear)
         else:
             sentiment_color = "#7f8c8d"  # Neutral
-            gauge_position = 0.5  # 50% (center of Neutral)
+        # Map 0-100 to 0-180 degrees (half-circle gauge)
+        needle_angle = (fng_value / 100) * 180 - 90  # -90 to 90 degrees
     except Exception:
         sentiment = "N/A"
         sentiment_color = "black"
-        gauge_position = 0.5  # Default to middle if error
+        needle_angle = 0  # Default to center if error
 
-    # Clean horizontal display with percentage changes
+    # Horizontal display with percentage changes
     market_line = (
         f"S&P 500 (SPY): ${market_data['S&P 500 (SPY)']['price']:.2f} "
         f"({'+' if market_data['S&P 500 (SPY)']['change'] >= 0 else ''}{market_data['S&P 500 (SPY)']['change']:.2f}%) | "
@@ -69,17 +66,22 @@ def display_market_overview():
     )
     st.markdown(market_line, unsafe_allow_html=True)
 
-    # Meter-like gauge for Fear & Greed
+    # Dial gauge for Fear & Greed
     gauge_html = f"""
-    <div style="width: 100%; height: 20px; background: linear-gradient(to right, 
-        #e74c3c 0%, #e74c3c 25%, 
-        #c0392b 25%, #c0392b 50%, 
-        #7f8c8d 50%, #7f8c8d 75%, 
-        #27ae60 75%, #27ae60 87.5%, 
-        #2ecc71 87.5%, #2ecc71 100%); position: relative;">
-        <div style="position: absolute; left: {gauge_position * 100}%; top: 0; width: 2px; height: 100%; background: black;"></div>
+    <div style="width: 300px; height: 150px; position: relative; margin: 20px auto;">
+        <!-- Semicircle background with color zones -->
+        <div style="width: 100%; height: 100%; background: linear-gradient(to right, 
+            #e74c3c 0%, #e74c3c 25%, 
+            #c0392b 25%, #c0392b 50%, 
+            #7f8c8d 50%, #7f8c8d 75%, 
+            #27ae60 75%, #27ae60 87.5%, 
+            #2ecc71 87.5%, #2ecc71 100%); 
+            clip-path: ellipse(50% 100% at 50% 100%); border: 2px solid #333;"></div>
+        <!-- Needle -->
+        <div style="width: 2px; height: 70%; background: black; position: absolute; bottom: 0; left: 50%; 
+            transform-origin: bottom center; transform: rotate({needle_angle}deg);"></div>
     </div>
-    <div style="display: flex; justify-content: space-between; font-size: 12px;">
+    <div style="display: flex; justify-content: space-between; width: 300px; margin: 0 auto; font-size: 12px;">
         <span>Extreme Fear</span><span>Fear</span><span>Neutral</span><span>Greed</span><span>Extreme Greed</span>
     </div>
     """
